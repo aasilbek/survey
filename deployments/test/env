@@ -1,0 +1,9 @@
+export PROJECT_NAME="survey"
+export DJANGO_SETTINGS_MODULE="config.settings.test"
+export DB_NAME="survey"
+export DB_HOST="localhost"
+export DB_PORT="5432"
+export DB_USER="survey"
+export DB_PASS="survey"
+export SECRET_KEY="x!n&*dbowb_b9oanxvt6!^f5w=pp95wn_w%+bmu==zl4&x+va+"
+export PYTHONDONTWRITEBYTECODE=1
