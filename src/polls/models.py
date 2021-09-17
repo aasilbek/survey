@@ -19,8 +19,9 @@ class BaseModel(models.Model):
 class Poll(BaseModel):
     title = models.CharField(max_length=256, db_index=True)
     description = models.TextField(max_length=1024)
-    start_at = models.DateField(editable=False)
+    start_at = models.DateField()
     end_at = models.DateField()
+    creator = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     objects = PollManager()
 
     class Meta:
@@ -47,12 +48,19 @@ class Question(BaseModel):
             (MULTIPLECHOICE, "multiplechoice"),
         )
 
-    poll = models.ForeignKey("Poll", on_delete=models.CASCADE)
+    poll = models.ForeignKey(
+        "Poll",
+        on_delete=models.CASCADE,
+        related_name="questions",
+        related_query_name="question",
+    )
     text = models.CharField(max_length=256, db_index=True)
     option_type = models.CharField(
         max_length=20, choices=OptionType.choices, default=OptionType.TEXT
     )
-    options = ArrayField(models.CharField(max_length=50))
+    options = ArrayField(
+        models.CharField(max_length=50, blank=True), blank=True
+    )
     creator = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     objects = QuestionManager()
 
