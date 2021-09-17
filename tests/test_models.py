@@ -76,3 +76,27 @@ def test_answer():
     Answer.objects.create(question=question, vote=vote, choices=["1"])
 
     assert Answer.objects.count() == 1
+
+
+def create_user(email: str):
+    User = get_user_model()
+    return User.objects.create(email=email)
+
+
+@pytest.mark.django_db
+def test_create_user_adds_new_user(django_assert_num_queries):
+    # Given
+    email = "user@email.com"
+
+    # When
+    with django_assert_num_queries(1):
+        user = create_user(email)
+
+    # Then
+    assert user.email == email
+
+
+@pytest.mark.django_db
+def test_create_user_raises_exception(django_assert_num_queries):
+    with django_assert_num_queries(0), pytest.raises(TypeError):
+        create_user()
