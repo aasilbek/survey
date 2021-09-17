@@ -21,9 +21,7 @@ BASE_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 ]
-THIRD_PARTY_APPS = [
-    "rest_framework",
-]
+THIRD_PARTY_APPS = ["rest_framework", "drf_yasg"]
 
 LOCAL_APPS = ["polls"]
 

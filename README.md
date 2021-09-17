@@ -80,3 +80,8 @@ python runserver 0.0.0.0:8080
 ```
 pytest -v
 ```
+
+- Documentation on:
+```
+http://127.0.0.1:8000/swagger/
+```
