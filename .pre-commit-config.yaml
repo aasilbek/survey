@@ -13,11 +13,3 @@ repos:
     rev: 3.9.2
     hooks:
       - id: flake8
-  - repo: local
-    hooks:
-      - id: migrations-check
-        language: system
-        name: Check for uncreated migrations.
-        entry: sh -c "./src/manage.py makemigrations --check --dry-run"
-        files: "models\\.py$"
-        stages: [ commit ]
