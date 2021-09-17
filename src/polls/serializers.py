@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from polls.models import Poll, Question
+from polls.models import Answer, Poll, Question, Vote
 
 
 class PollSerializer(serializers.ModelSerializer):
@@ -79,3 +79,41 @@ class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ("guid", "poll", "text", "option_type", "options")
+
+
+class AnswerSerializer(serializers.ModelSerializer):
+    question = serializers.SlugRelatedField(
+        slug_field="guid", queryset=Question.objects.all()
+    )
+
+    class Meta:
+        model = Answer
+        fields = (
+            "guid",
+            "vote",
+            "question",
+            "choices",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = ("guid", "vote", "created_at", "updated_at")
+
+
+class VoteWithAnswersSerializer(serializers.ModelSerializer):
+    answers = AnswerSerializer(many=True, allow_null=False, allow_empty=False)
+    poll = serializers.SlugRelatedField(
+        slug_field="guid", queryset=Poll.objects.all()
+    )
+
+    class Meta:
+        model = Vote
+        fields = ("guid", "poll", "answers", "created_at", "updated_at")
+        read_only_fields = ("guid", "created_at", "updated_at")
+
+
+class VoteSerializer(serializers.ModelSerializer):
+    poll = PollSerializer(read_only=True)
+
+    class Meta:
+        model = Vote
+        fields = ("guid", "poll", "created_at", "updated_at")

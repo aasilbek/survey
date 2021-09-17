@@ -7,13 +7,15 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import IsAdminUser
 
-from polls.models import Poll, Question
+from polls.models import Poll, Question, Vote
 from polls.pagination import Pagination
 from polls.serializers import (
     PollSerializer,
     PollUpdateSerializer,
     PollWithQuestionSerializer,
     QuestionSerializer,
+    VoteSerializer,
+    VoteWithAnswersSerializer,
 )
 
 
@@ -59,7 +61,7 @@ class ListPollView(ListAPIView):
 
 class DetailPollView(RetrieveAPIView):
     serializer_class = PollWithQuestionSerializer
-    queryset = Poll.objects.all()
+    queryset = Poll.objects.get_with_question()
     lookup_field = "guid"
 
 
@@ -98,3 +100,32 @@ class DetailQuestionView(RetrieveAPIView):
     serializer_class = QuestionSerializer
     queryset = Question.objects.all()
     lookup_field = "guid"
+
+
+class CreateVoteView(CreateAPIView):
+    serializer_class = VoteWithAnswersSerializer
+
+    def perform_create(self, serializer):
+        serializer.instance = Vote.objects.create_with_answers(
+            serializer.validated_data, self.request.user
+        )
+
+
+class DetailVoteView(RetrieveAPIView):
+    serializer_class = VoteWithAnswersSerializer
+    queryset = Vote.objects.prefetch_related("answers")
+    lookup_field = "guid"
+
+
+class ListVoteView(ListAPIView):
+    serializer_class = VoteSerializer
+    pagination_class = Pagination
+
+    def get_queryset(self):
+        return Vote.objects.get_with_answers()
+
+
+class ListActivePollView(ListAPIView):
+    serializer_class = PollSerializer
+    pagination_class = Pagination
+    queryset = Poll.objects.get_active_polls()

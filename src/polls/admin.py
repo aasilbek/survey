@@ -1,9 +1,15 @@
 from django.contrib import admin
 
-from .models import Poll, Question
+from .models import Answer, Poll, Question, Vote
+
+
+class QuestionAdmin(admin.TabularInline):
+    model = Question
+    list_display = ("guid", "text", "option_type", "options")
 
 
 class PollAdmin(admin.ModelAdmin):
+    inlines = [QuestionAdmin]
     model = Poll
     list_display = ("guid", "title")
 
@@ -11,9 +17,14 @@ class PollAdmin(admin.ModelAdmin):
 admin.site.register(Poll, PollAdmin)
 
 
-class QuestionAdmin(admin.ModelAdmin):
-    model = Question
-    list_display = ("guid", "text", "option_type", "options")
+class AnswerAdmin(admin.TabularInline):
+    model = Answer
 
 
-admin.site.register(Question, QuestionAdmin)
+class VoteAdmin(admin.ModelAdmin):
+    inlines = [AnswerAdmin]
+    model = Vote
+    list_display = ("guid", "poll", "user")
+
+
+admin.site.register(Vote, VoteAdmin)
