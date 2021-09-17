@@ -17,13 +17,6 @@ class PollSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ("guid", "created_at", "updated_at")
 
-    def validate_start_at(self, value):
-        if self.instance and self.instance.start_at:
-            raise serializers.ValidationError(
-                "Not allowed to change stat_at after poll is started"
-            )
-        return value
-
 
 class PollUpdateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,14 +33,23 @@ class PollUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ("guid", "start_at", "created_at", "updated_at")
 
 
-class QuestionSerializer(serializers.ModelSerializer):
+class PollQuestionSerializer(serializers.ModelSerializer):
+    options = serializers.ListSerializer(
+        child=serializers.CharField(), required=True
+    )
+    option_type = serializers.ChoiceField(
+        required=True, choices=Question.OptionType.choices
+    )
+
     class Meta:
         model = Question
         fields = ("guid", "text", "option_type", "options")
 
 
-class DetailPollSerializer(serializers.ModelSerializer):
-    questions = QuestionSerializer(many=True)
+class PollWithQuestionSerializer(serializers.ModelSerializer):
+    questions = PollQuestionSerializer(
+        many=True, allow_null=False, allow_empty=False
+    )
 
     class Meta:
         model = Poll
@@ -61,3 +63,19 @@ class DetailPollSerializer(serializers.ModelSerializer):
             "end_at",
             "questions",
         )
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    poll = serializers.SlugRelatedField(
+        slug_field="guid", queryset=Poll.objects.all()
+    )
+    options = serializers.ListSerializer(
+        child=serializers.CharField(), required=True
+    )
+    option_type = serializers.ChoiceField(
+        required=True, choices=Question.OptionType.choices
+    )
+
+    class Meta:
+        model = Question
+        fields = ("guid", "poll", "text", "option_type", "options")

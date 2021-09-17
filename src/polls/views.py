@@ -7,12 +7,13 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import IsAdminUser
 
-from polls.models import Poll
+from polls.models import Poll, Question
 from polls.pagination import Pagination
 from polls.serializers import (
-    DetailPollSerializer,
     PollSerializer,
     PollUpdateSerializer,
+    PollWithQuestionSerializer,
+    QuestionSerializer,
 )
 
 
@@ -23,6 +24,16 @@ class CreatePollView(CreateAPIView):
     def perform_create(self, serializer):
         serializer.instance = Poll.objects.create(
             **serializer.validated_data, creator=self.request.user
+        )
+
+
+class CreatePollWithQuestionView(CreateAPIView):
+    serializer_class = PollWithQuestionSerializer
+    permission_classes = (IsAdminUser,)
+
+    def perform_create(self, serializer):
+        serializer.instance = Poll.objects.create_with_questions(
+            serializer.validated_data, creator=self.request.user
         )
 
 
@@ -47,6 +58,43 @@ class ListPollView(ListAPIView):
 
 
 class DetailPollView(RetrieveAPIView):
-    serializer_class = DetailPollSerializer
+    serializer_class = PollWithQuestionSerializer
     queryset = Poll.objects.all()
+    lookup_field = "guid"
+
+
+class CreateQuestionView(CreateAPIView):
+    serializer_class = QuestionSerializer
+    permission_classes = (IsAdminUser,)
+
+    def perform_create(self, serializer):
+        serializer.instance = Question.objects.create(
+            **serializer.validated_data, creator=self.request.user
+        )
+
+
+class UpdateQuestionView(UpdateAPIView):
+    serializer_class = QuestionSerializer
+    permission_classes = (IsAdminUser,)
+    queryset = Question.objects.all()
+    lookup_field = "guid"
+
+
+class DeleteQuestionView(DestroyAPIView):
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
+    permission_classes = (IsAdminUser,)
+    lookup_field = "guid"
+
+
+class ListQuestionView(ListAPIView):
+    serializer_class = QuestionSerializer
+
+    def get_queryset(self):
+        return Question.objects.filter(poll__guid=self.kwargs["guid"])
+
+
+class DetailQuestionView(RetrieveAPIView):
+    serializer_class = QuestionSerializer
+    queryset = Question.objects.all()
     lookup_field = "guid"
